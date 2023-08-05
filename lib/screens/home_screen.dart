@@ -6,9 +6,14 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../providers/notes.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final notesData = Provider.of<Notes>(context);
@@ -26,26 +31,29 @@ class HomeScreen extends StatelessWidget {
           SizedBox(width: 10.w),
         ],
       ),
-      body: GridView.builder(
-        itemCount: notes.length,
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 3,
-          childAspectRatio: 3/4,
-        ),
-        itemBuilder: (context, index) => noteTile(
-          context,
-          id: notes[index].id,
-          title: notes[index].title,
-          date: notes[index].date,
-          description: notes[index].description,
-          isFavorite: notes[index].isFavorite,
-          isImportant: notes[index].isImportant,
-          onFavoriteTap: () {
-            notesData.toggleIsFavorite(notes[index].id);
-          },
-          onDeleteTap: () {
-            notesData.deleteNoteById(notes[index].id);
-          },
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: GridView.builder(
+          itemCount: notes.length,
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 3,
+            childAspectRatio: 3/4,
+          ),
+          itemBuilder: (context, index) => noteTile(
+            context,
+            id: notes[index].id,
+            title: notes[index].title,
+            date: notes[index].date,
+            description: notes[index].description,
+            isFavorite: notes[index].isFavorite,
+            isImportant: notes[index].isImportant,
+            onFavoriteTap: () {
+              notesData.toggleIsFavorite(notes[index].id);
+            },
+            onDeleteTap: () {
+              notesData.deleteNoteById(notes[index].id);
+            },
+          ),
         ),
       ),
     );

@@ -1,11 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:untitled1/providers/notes.dart';
 
 import 'screens/home_screen.dart';
 
-void main() {
+void main() async{
+
+  WidgetsFlutterBinding.ensureInitialized();
+  await Hive.initFlutter();
+  await Hive.openBox('notes');
+  // Hive.box('notes').clear();
+
   runApp(const MyApp());
 }
 
@@ -15,8 +22,10 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    Notes notes = Notes();
+    notes.fetchNotes();
     return ChangeNotifierProvider(
-      create: (context) => Notes(),
+      create: (context) => notes,
       child: ScreenUtilInit(
         designSize: const Size(411.42857142857144, 914.2857142857143),
         minTextAdapt: true,

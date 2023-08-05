@@ -14,4 +14,17 @@ class Note {
     this.isImportant = false,
     this.isFavorite = false,
   });
+
+  Map<String,dynamic> noteMap(){
+    return {
+      'id': id,
+      'title': title,
+      'description': description,
+      'date': date,
+      'isImportant': isImportant,
+      'isFavorite': isFavorite,
+    };
+  }
+
+
 }
