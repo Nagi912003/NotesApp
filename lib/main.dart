@@ -1,17 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:untitled1/providers/notes.dart';
 
+import 'models/note.dart';
 import 'screens/home_screen.dart';
 
 void main() async{
 
   WidgetsFlutterBinding.ensureInitialized();
   await Hive.initFlutter();
-  await Hive.openBox('notes');
-  // Hive.box('notes').clear();
+  Hive.registerAdapter(NoteAdapter());
+  await Hive.openBox<Note>('Notes');
+  await Hive.openBox('navigation');
 
   runApp(const MyApp());
 }
@@ -40,9 +43,20 @@ class MyApp extends StatelessWidget {
             ),
             darkTheme: ThemeData(
               brightness: Brightness.dark,
+              textTheme: TextTheme(
+                titleSmall: GoogleFonts.montserrat(),
+                titleMedium: GoogleFonts.montserrat(),
+                titleLarge: GoogleFonts.montserrat(),
+                displaySmall: GoogleFonts.montserrat(),
+                displayMedium: GoogleFonts.montserrat(),
+                displayLarge: GoogleFonts.montserrat(),
+                bodySmall: GoogleFonts.montserrat(),
+                bodyMedium: GoogleFonts.montserrat(),
+                bodyLarge: GoogleFonts.montserrat(),
+              ),
               useMaterial3: true,
             ),
-            themeMode: ThemeMode.dark,
+            themeMode: ThemeMode.system,
             home: const HomeScreen(),
           );
         },

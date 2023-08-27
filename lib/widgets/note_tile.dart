@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../screens/add_note_screen.dart';
+
 
 Widget noteTile(context,
     {
+      required int index,
       id,
       title,
       date,
@@ -16,11 +19,11 @@ Widget noteTile(context,
     children: [
       InkWell(
         onTap: () {
-
+          Navigator.of(context).push(MaterialPageRoute(builder: (context)=>AddNoteScreen(index: index,title: title, description: description,)));
         },
         child: Card(
           child: Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.all(16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
@@ -43,7 +46,7 @@ Widget noteTile(context,
                 ),
                 SizedBox(
                   height: 8.h,
-                  width: 200.w,
+                  width: 1.sw,
                 ),
                 SizedBox(
                   height: 50.h,
@@ -61,19 +64,19 @@ Widget noteTile(context,
         top: 5.h,
         right: 10.h,
         child: DropdownButton(
-          icon: const Icon(
+          icon: Icon(
             Icons.more_vert,
-            color: Colors.grey,
+            color: Theme.of(context).colorScheme.error,
           ),
           borderRadius: BorderRadius.circular(10),
-          menuMaxHeight: 50.h,
+          menuMaxHeight: 60.h,
           underline: Container(),
           items: [
             DropdownMenuItem(
               value: 'delete',
               child: Text(
                 'Delete',
-                style: Theme.of(context).textTheme.labelSmall,
+                style: Theme.of(context).textTheme.labelLarge!.copyWith(color: Theme.of(context).colorScheme.error),
               ),
             ),
           ],
