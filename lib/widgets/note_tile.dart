@@ -1,105 +1,111 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:provider/provider.dart';
 
+import '../providers/notes.dart';
 import '../screens/add_note_screen.dart';
 
+class CustomCard extends StatelessWidget {
+  final String title;
+  final String description;
 
-Widget noteTile(context,
-    {
-      required int index,
-      id,
-      title,
-      date,
-      description,
-      isFavorite,
-      isImportant,
-      onFavoriteTap,
-      onDeleteTap}) {
-  return Stack(
-    children: [
-      InkWell(
-        onTap: () {
-          Navigator.of(context).push(MaterialPageRoute(builder: (context)=>AddNoteScreen(index: index,title: title, description: description,)));
-        },
-        child: Card(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
+  CustomCard({required this.title, required this.description});
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(4.0),
+        child: SizedBox(
+          width: 1.sw,
+          child: IntrinsicHeight(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                SizedBox(
-                  height: 25.h,
-                  child: Text(
+                if (title != '')
+                  Text(
                     title,
-                    style: Theme.of(context).textTheme.titleSmall,
-                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                    ),
                   ),
-                ),
-                SizedBox(
-                  height: 20.h,
-                  child: Text(
-                    date.toString().substring(0, 10),
-                    style: Theme.of(context).textTheme.bodyMedium,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                SizedBox(
-                  height: 8.h,
-                  width: 1.sw,
-                ),
-                SizedBox(
-                  height: 50.h,
-                  child: Text(
-                    description,
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
+                Text(
+                  description,
+                  maxLines: title != '' ? 12 : 13,
+                  overflow: TextOverflow.fade,
                 ),
               ],
             ),
           ),
         ),
       ),
-      Positioned(
-        top: 5.h,
-        right: 10.h,
-        child: DropdownButton(
-          icon: Icon(
-            Icons.more_vert,
-            color: Theme.of(context).colorScheme.error,
-          ),
-          borderRadius: BorderRadius.circular(10),
-          menuMaxHeight: 60.h,
-          underline: Container(),
-          items: [
-            DropdownMenuItem(
-              value: 'delete',
-              child: Text(
-                'Delete',
-                style: Theme.of(context).textTheme.labelLarge!.copyWith(color: Theme.of(context).colorScheme.error),
-              ),
-            ),
-          ],
-          onChanged: (value) {
-            if (value == 'delete') {
-              onDeleteTap();
-              // Navigator.of(context).pushNamed(AddNoteScreen.routeName);
+    );
+  }
+}
+
+class NoteTile extends StatefulWidget {
+  final index;
+  const NoteTile({super.key, this.index});
+  @override
+  State<NoteTile> createState() => _NoteTileState();
+}
+
+class _NoteTileState extends State<NoteTile> {
+  @override
+  Widget build(BuildContext context) {
+    final notesData = Provider.of<Notes>(context);
+    final notes = Provider.of<Notes>(context, listen: false).items;
+    // print(notesData.isSelected(widget.index));
+    return Stack(
+      children: [
+        InkWell(
+          onTap: () {
+            if (notesData.selecting == false) {
+              Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => AddNoteScreen(
+                        index: widget.index,
+                        title: notes.elementAt(widget.index).title,
+                        description: notes.elementAt(widget.index).description,
+                      )));
+            } else {
+              if (notesData.isSelected(widget.index)) {
+                print('removing');
+                notesData.removeSelected(widget.index);
+                if(notesData.selectedItems.length == 0){
+                  notesData.selecting = false;
+                }
+              }else{
+                print('adding');
+                notesData.addSelected(widget.index);
+              }
             }
           },
-        ),
-      ),
-      Positioned(
-        bottom: 5.h,
-        right: 5.h,
-        child: IconButton(
-          icon: Icon(
-            isFavorite ? Icons.favorite : Icons.favorite_border,
-            color:
-            isFavorite ? Theme.of(context).colorScheme.error : Colors.grey,
+          onLongPress: () {
+            if (notesData.selecting == false) {
+              notesData.selecting = true;
+            }
+            notesData.addSelected(widget.index );
+          },
+          child: Container(
+            margin: EdgeInsets.all(4),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              color: notesData.isSelected(widget.index)
+                  ? Theme.of(context).colorScheme.secondary
+                  : Theme.of(context).colorScheme.surface,
+            ),
+            child: CustomCard(
+              title: notes.elementAt(widget.index).title,
+              description: notes.elementAt(widget.index).description,
+            ),
           ),
-          onPressed: onFavoriteTap,
         ),
-      ),
-    ],
-  );
+      ],
+    );
+  }
 }

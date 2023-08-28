@@ -12,10 +12,7 @@ void main() async{
 
   WidgetsFlutterBinding.ensureInitialized();
   await Hive.initFlutter();
-  Hive.registerAdapter(NoteAdapter());
-  await Hive.openBox<Note>('Notes');
-  await Hive.openBox('navigation');
-
+  var box = await Hive.openBox('navigation');
   runApp(const MyApp());
 }
 

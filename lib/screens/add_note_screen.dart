@@ -31,68 +31,78 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: widget.index == null
-            ? Text(
-                'Add Note',
-                style:
-                    TextStyle(fontSize: 40.sp, fontFamily: 'AlexBrush-Regular'),
-              )
-            : Text(
-                'Edit Note',
-                style:
-                    TextStyle(fontSize: 40.sp, fontFamily: 'AlexBrush-Regular'),
-              ),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              const SizedBox(height: 10),
-              myTextField(
-                hintText: 'Title',
-                controller: _titleController!,
-                maxLines: 1,
-                textStyle: Theme.of(context).textTheme.displaySmall!.copyWith(color: Colors.grey[700]),
-              ),
-              const SizedBox(height: 10),
-              myTextField(
-                hintText: 'Description',
-                controller: _descriptionController!,
-                maxLines: 25,
-                textStyle: Theme.of(context).textTheme.titleLarge!.copyWith(color: Colors.grey[700]),
-              ),
-              const SizedBox(height: 10),
-              widget.index == null
-                  ? TextButton(
-                      child: Text('Add', style: Theme.of(context).textTheme.titleMedium!.copyWith(color: Colors.deepPurple),),
-                      onPressed: () {
-                        Provider.of<Notes>(context, listen: false).addNote(
-                          title: _titleController!.text,
-                          description: _descriptionController!.text,
-                        );
-                        Navigator.of(context).pop();
-                      },
-                    )
-                  : TextButton(
-                      child: const Text('Edit'),
-                      onPressed: () {
-                        Provider.of<Notes>(context, listen: false).editNote(
-                          index: widget.index!,
-                          title: _titleController!.text,
-                          description: _descriptionController!.text,
-                        );
-                        Navigator.of(context).pop();
-                      },
-                    )
-            ],
+    return WillPopScope(
+      onWillPop: () => _onWillPop(context),
+      child: Scaffold(
+        appBar: AppBar(
+          title: widget.index == null
+              ? Text(
+                  'Add Note',
+                  style: TextStyle(
+                      fontSize: 40.sp, fontFamily: 'AlexBrush-Regular'),
+                )
+              : Text(
+                  'Edit Note',
+                  style: TextStyle(
+                      fontSize: 40.sp, fontFamily: 'AlexBrush-Regular'),
+                ),
+        ),
+        body: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                const SizedBox(height: 10),
+                myTextField(
+                  hintText: 'Title',
+                  controller: _titleController!,
+                  maxLines: 1,
+                  textStyle: Theme.of(context)
+                      .textTheme
+                      .displaySmall!
+                      .copyWith(color: Colors.grey[700]),
+                ),
+                const SizedBox(height: 10),
+                myTextField(
+                  hintText: 'Description',
+                  controller: _descriptionController!,
+                  maxLines: 25,
+                  textStyle: Theme.of(context)
+                      .textTheme
+                      .titleLarge!
+                      .copyWith(color: Colors.grey[700]),
+                ),
+              ],
+            ),
           ),
         ),
       ),
     );
+  }
+
+  Future<bool> _onWillPop(BuildContext context) async {
+    if(_titleController!.text.isEmpty && _descriptionController!.text.isEmpty && widget.index == null){
+      return true;
+    }
+    if(_titleController!.text.isEmpty && _descriptionController!.text.isEmpty && widget.index != null){
+      Provider.of<Notes>(context, listen: false).deleteNoteAt(
+        widget.index!,
+      );
+      return true;
+    }
+
+    widget.index == null
+        ? Provider.of<Notes>(context, listen: false).addNote(
+            title: _titleController!.text.trim(),
+            description: _descriptionController!.text.trim(),
+          )
+        : Provider.of<Notes>(context, listen: false).editNote(
+            index: widget.index!,
+            title: _titleController!.text.trim(),
+            description: _descriptionController!.text.trim(),
+          );
+    return true;
   }
 
   Widget myTextField(
@@ -102,7 +112,8 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
       required TextStyle? textStyle}) {
     return TextField(
       controller: controller,
-      style: textStyle!.copyWith(color: Theme.of(context).textTheme.titleLarge!.color),
+      style: textStyle!
+          .copyWith(color: Theme.of(context).textTheme.titleLarge!.color),
       decoration: InputDecoration(
         hintStyle: textStyle,
         hintText:

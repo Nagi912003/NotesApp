@@ -1,12 +1,43 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:hive_flutter/hive_flutter.dart';
+import 'package:untitled1/helpers/notes_box.dart';
 import 'package:untitled1/models/note.dart';
 
 class Notes with ChangeNotifier{
 
-  final Box _myBox = Hive.box<Note>('Notes');
-  List <Note> items = [];
+  // final Box _myBox = Hive.box('Notes');
+  List <Note> _items = [];
+
+  List <Note> get items {
+    NotesBox.getNotes().then((value) {
+      _items = value.map((e) => Note.fromMap(e)).toList();
+      notifyListeners();
+    });
+    return [..._items];
+  }
+
+  List<int> selectedItems = [];
+  bool selecting = false;
+
+  List<Note> evenNotes(){
+    List<Note> evenNotes = [];
+    for(int i=0; i<_items.length; i++){
+      if(i%2==0){
+        evenNotes.add(_items[i]);
+      }
+    }
+    return evenNotes;
+  }
+
+  List<Note> oddNotes(){
+    List<Note> oddNotes = [];
+    for(int i=0; i<_items.length; i++){
+      if(i%2!=0){
+        oddNotes.add(_items[i]);
+      }
+    }
+    return oddNotes;
+  }
 
 
   void addNote({
@@ -20,8 +51,9 @@ class Notes with ChangeNotifier{
       description: description,
       date: DateTime.now(),
     );
-    _myBox.add(noteNew);
-    items.add(noteNew);
+    // _myBox.add(noteNew);
+    _items.add(noteNew);
+    NotesBox.addNotes(noteNew.toMap());
     notifyListeners();
   }
 
@@ -30,34 +62,47 @@ class Notes with ChangeNotifier{
     required String description,
     required int index,
   }){
-    items[index].title = title;
-    items[index].description = description;
-    _myBox.putAt(index, items[index]);
+    _items[index].title = title;
+    _items[index].description = description;
+    _items[index].date = DateTime.now();
+    NotesBox.editNotes(_items[index].toMap(), index);
     notifyListeners();
   }
 
   void fetchNotes(){
-    items.clear();
+    _items.clear();
 
-    for(int i=0; i<_myBox.length; i++){
-      items.add(_myBox.getAt(i)!);
-
-    }
+    NotesBox.getNotes().then((value) {
+      _items = value.map((e) => Note.fromMap(e)).toList();
+      notifyListeners();
+    });
     WidgetsBinding.instance.addPostFrameCallback((_) {
       notifyListeners();
     });
   }
 
-  void deleteNoteById(int index){
-    items.removeAt(index);
-    _myBox.deleteAt(index);
+  void deleteNoteAt(int index){
+    _items.removeAt(index);
+    NotesBox.removeNotes(index);
     notifyListeners();
   }
 
-  void toggleIsFavorite(int index){
-    items[index].isFavorite = !items[index].isFavorite;
-    _myBox.putAt(index, items[index]);
+  void addSelected(int index){
+    if(selectedItems.contains(index)){
+      return;
+    }
+    selectedItems.add(index);
+    print(selectedItems.length);
     notifyListeners();
+  }
+
+  void removeSelected(int index){
+    selectedItems.remove(index);
+    notifyListeners();
+  }
+
+  bool isSelected(int index){
+    return selectedItems.contains(index);
   }
 
 }
