@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:untitled1/screens/add_note_screen.dart';
-import 'package:untitled1/widgets/note_tile.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import 'package:untitled1/models/note.dart';
 import '../providers/notes.dart';
+import 'package:untitled1/screens/add_note_screen.dart';
+import 'package:untitled1/widgets/note_tile.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -17,45 +18,109 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final notesData = Provider.of<Notes>(context);
-    final notes = Provider.of<Notes>(context).items;
+    final notes = Provider.of<Notes>(context, listen: false).items;
+
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'notes',
-          style: TextStyle(fontSize: 40.sp, fontFamily: 'AlexBrush-Regular'),
-        ),
-        actions: [
-          IconButton(onPressed: (){
-            Navigator.push(context, MaterialPageRoute(builder: (context)=>AddNoteScreen()));
-          }, icon: Icon(Icons.add)),
-          SizedBox(width: 10.w),
-        ],
-      ),
+      appBar: MyAppBar(notesData.selecting),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
-        child: GridView.builder(
-          itemCount: notes.length,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 3,
-            childAspectRatio: 3/4,
-          ),
-          itemBuilder: (context, index) => noteTile(
-            context,
-            id: notes[index].id,
-            title: notes[index].title,
-            date: notes[index].date,
-            description: notes[index].description,
-            isFavorite: notes[index].isFavorite,
-            isImportant: notes[index].isImportant,
-            onFavoriteTap: () {
-              notesData.toggleIsFavorite(notes[index].id);
-            },
-            onDeleteTap: () {
-              notesData.deleteNoteById(notes[index].id);
-            },
-          ),
-        ),
+        child: buildPage(notesData, notes),
+        // Container(
+        //   width: 1.sw,
+        //   height: 1.sh,
+        //   color: Color(0xff1f191f),
+        // ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.of(context).push(_createRoute(null, null, null));
+        },
+        child: const Icon(Icons.add),
       ),
     );
   }
+
+  Widget buildPage(Notes notesData, List<Note> notes) {
+    return SingleChildScrollView(
+      child: Row(
+        mainAxisSize: MainAxisSize.max,
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: NotesColumn(notesData, notes, notesData.evenNotes()),
+          ),
+          Expanded(
+            child: NotesColumn(notesData, notes, notesData.oddNotes()),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget NotesColumn(Notes notesData, List<Note> notes, List<Note> notesList) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: notesList
+          .map(
+            (e) => NoteTile(
+              index: notes.indexOf(e),
+            ),
+          )
+          .toList(),
+    );
+  }
+
+  AppBar MyAppBar(bool selecting) {
+    return AppBar(
+      title: Text(
+        'notes',
+        style: TextStyle(fontSize: 40.sp, fontFamily: 'AlexBrush-Regular'),
+      ),
+      actions: [
+
+        selecting
+            ? IconButton(
+                onPressed: () {
+                  Provider.of<Notes>(context, listen: false).selecting = false;
+                  Provider.of<Notes>(context, listen: false).selectedItems.clear();
+                },
+                icon: Icon(Icons.close))
+            : IconButton(
+                onPressed: () {
+                  Provider.of<Notes>(context, listen: false).selecting = true;
+                },
+                icon: Icon(Icons.select_all)),
+        selecting
+            ? IconButton(
+            onPressed: () {
+              Provider.of<Notes>(context, listen: false).deleteSelected();
+            },
+            icon: Icon(Icons.delete_outline))
+            : IconButton(
+            onPressed: () {
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => AddNoteScreen()));
+            },
+            icon: Icon(Icons.add)),
+      ],
+    );
+  }
+}
+
+Route _createRoute(int? index, String? title, String? description) {
+  return PageRouteBuilder(
+    pageBuilder: (context, animation, secondaryAnimation) => index!=null?AddNoteScreen(index: index,title: title,description: description):AddNoteScreen(),
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      const begin = Offset(1.0, 0.0);
+      const end = Offset.zero;
+      const curve = Curves.easeInOut;
+
+      var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+
+      var offsetAnimation = animation.drive(tween);
+
+      return SlideTransition(position: offsetAnimation, child: child);
+    },
+  );
 }

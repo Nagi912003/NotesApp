@@ -1,102 +1,128 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:hive_flutter/hive_flutter.dart';
+import 'package:untitled1/helpers/notes_box.dart';
 import 'package:untitled1/models/note.dart';
 
 class Notes with ChangeNotifier{
 
-  final Box _myBox = Hive.box('notes');
+  // final Box _myBox = Hive.box('Notes');
+  List <Note> _items = [];
 
-  List<Note> _items = [];
-  List itemsIds = [];
-
-  List get items{
+  List <Note> get items {
+    NotesBox.getNotes().then((value) {
+      _items = value.map((e) => Note.fromMap(e)).toList();
+      notifyListeners();
+    });
     return [..._items];
+  }
+  List<int> selectedItems = [];
+  bool selecting = false;
+
+  List<Note> evenNotes(){
+    List<Note> evenNotes = [];
+    for(int i=0; i<_items.length; i++){
+      if(i%2==0){
+        evenNotes.add(_items[i]);
+      }
+    }
+    return evenNotes;
+  }
+
+  List<Note> oddNotes(){
+    List<Note> oddNotes = [];
+    for(int i=0; i<_items.length; i++){
+      if(i%2!=0){
+        oddNotes.add(_items[i]);
+      }
+    }
+    return oddNotes;
   }
 
 
   void addNote({
     required String title,
     required String description,
+    colorIndex = 0,
   }){
     final id = DateTime.now().toString();
-    _items.add(
-        Note(id: id,
-            title: title, description: description, date: DateTime.now())
-      );
-    if(!_myBox.containsKey(id)){
-      _myBox.put(id, Note(id: DateTime.now().toString(),
-        title: title, description: description, date: DateTime.now()).noteMap());
-      itemsIds.add(id);
-      _myBox.put('itemsIds', itemsIds);
-    }
+    Note noteNew= Note(
+      id: id,
+      title: title,
+      description: description,
+      date: DateTime.now(),
+      colorIndex: colorIndex,
+    );
+    // _myBox.add(noteNew);
+    _items.add(noteNew);
+    NotesBox.addNotes(noteNew.toMap());
+    notifyListeners();
+  }
 
-
-
+  void editNote({
+    required String title,
+    required String description,
+    required int index,
+    colorIndex = 0,
+  }){
+    _items[index].title = title;
+    _items[index].description = description;
+    _items[index].date = DateTime.now();
+    _items[index].colorIndex = colorIndex;
+    NotesBox.editNotes(_items[index].toMap(), index);
     notifyListeners();
   }
 
   void fetchNotes(){
-    if(!_myBox.containsKey('itemsIds')){
-      _myBox.put('itemsIds', []);
-      return;
-    }
-
-    itemsIds.clear();
     _items.clear();
-    itemsIds = _myBox.get('itemsIds');
-    if (kDebugMode) {
-      print(itemsIds);
-    }
 
-    itemsIds.forEach((NoteId) {
-      final noteMap = _myBox.get(NoteId);
-      Note note = noteFromMap(noteMap);
-      if(!_items.contains(note)){
-        _items.add(note);
-      }
+    NotesBox.getNotes().then((value) {
+      _items = value.map((e) => Note.fromMap(e)).toList();
+      notifyListeners();
     });
-
     WidgetsBinding.instance.addPostFrameCallback((_) {
       notifyListeners();
     });
   }
 
-  void deleteNoteById(String id){
-    _items.removeWhere((element) => element.id == id);
-    _myBox.delete(id);
+  void deleteNoteAt(int index){
+    _items.removeAt(index);
+    NotesBox.removeNotes(index);
     notifyListeners();
   }
 
-  void toggleIsFavorite(String id){
-    _items.forEach((element) {
-      if(element.id == id){
-        element.isFavorite = !element.isFavorite;
-      }
-    });
+  void addSelected(int index){
+    if(selectedItems.contains(index)){
+      return;
+    }
+    selectedItems.add(index);
+    print(selectedItems.length);
     notifyListeners();
   }
 
-
-  Note noteFromMap(Map map){
-    return Note(
-      id: map['id'],
-      title: map['title'],
-      description: map['description'],
-      date: map['date'],
-      isImportant: map['isImportant'],
-      isFavorite: map['isFavorite'],
-    );
+  void removeSelected(int index){
+    selectedItems.remove(index);
+    notifyListeners();
   }
 
-  Map<String,dynamic> MapFromNote(Note note){
-    return {
-      'id': note.id,
-      'title': note.title,
-      'description': note.description,
-      'date': note.date,
-      'isImportant': note.isImportant,
-      'isFavorite': note.isFavorite,
-    };
+  bool isSelected(int index){
+    return selectedItems.contains(index);
   }
+
+  void deleteSelected(){
+    selectedItems.sort();
+    for(int i=selectedItems.length-1; i>=0; i--){
+      _items.removeAt(selectedItems[i]);
+      NotesBox.removeNotes(selectedItems[i]);
+    }
+    selectedItems.clear();
+    selecting = false;
+    notifyListeners();
+  }
+
+  void changeNoteColor(int index, int colorIndex){
+    _items[index].colorIndex = colorIndex;
+    NotesBox.editNotes(_items[index].toMap(), index);
+    notifyListeners();
+  }
+
 }
