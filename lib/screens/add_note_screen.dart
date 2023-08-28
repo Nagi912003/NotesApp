@@ -34,6 +34,7 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
     return WillPopScope(
       onWillPop: () => _onWillPop(context),
       child: Scaffold(
+        // backgroundColor: colorIndex == 0? Theme.of(context).colorScheme.background: colorIndex == 1? Colors.red: colorIndex == 2? Colors.blue: colorIndex == 3? Colors.green: Theme.of(context).colorScheme.background,
         appBar: AppBar(
           title: widget.index == null
               ? Text(
@@ -46,6 +47,21 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
                   style: TextStyle(
                       fontSize: 40.sp, fontFamily: 'AlexBrush-Regular'),
                 ),
+          actions: [
+            IconButton(
+              onPressed: () {
+                // change the color of the note
+              },
+              icon: Icon(Icons.color_lens_outlined),
+            ),
+            IconButton(
+              onPressed: () {
+                // make the note important
+              },
+              icon: Icon(Icons.star_border_rounded),
+            ),
+            SizedBox(width: 10.w)
+          ],
         ),
         body: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -82,10 +98,14 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
   }
 
   Future<bool> _onWillPop(BuildContext context) async {
-    if(_titleController!.text.isEmpty && _descriptionController!.text.isEmpty && widget.index == null){
+    if (_titleController!.text.isEmpty &&
+        _descriptionController!.text.isEmpty &&
+        widget.index == null) {
       return true;
     }
-    if(_titleController!.text.isEmpty && _descriptionController!.text.isEmpty && widget.index != null){
+    if (_titleController!.text.isEmpty &&
+        _descriptionController!.text.isEmpty &&
+        widget.index != null) {
       Provider.of<Notes>(context, listen: false).deleteNoteAt(
         widget.index!,
       );

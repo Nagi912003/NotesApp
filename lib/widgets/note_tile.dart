@@ -66,12 +66,11 @@ class _NoteTileState extends State<NoteTile> {
         InkWell(
           onTap: () {
             if (notesData.selecting == false) {
-              Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => AddNoteScreen(
-                        index: widget.index,
-                        title: notes.elementAt(widget.index).title,
-                        description: notes.elementAt(widget.index).description,
-                      )));
+              Navigator.of(context).push(_createRoute(
+                widget.index,
+                notes.elementAt(widget.index).title,
+                notes.elementAt(widget.index).description,
+              ));
             } else {
               if (notesData.isSelected(widget.index)) {
                 print('removing');
@@ -91,7 +90,8 @@ class _NoteTileState extends State<NoteTile> {
             }
             notesData.addSelected(widget.index );
           },
-          child: Container(
+          child: AnimatedContainer(
+            duration: Duration(milliseconds: 80),
             margin: EdgeInsets.all(2),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(10),
@@ -108,4 +108,21 @@ class _NoteTileState extends State<NoteTile> {
       ],
     );
   }
+}
+
+Route _createRoute(int? index, String? title, String? description) {
+  return PageRouteBuilder(
+    pageBuilder: (context, animation, secondaryAnimation) => index!=null?AddNoteScreen(index: index,title: title,description: description):AddNoteScreen(),
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      const begin = Offset(1.0, 0.0);
+      const end = Offset.zero;
+      const curve = Curves.easeInOut;
+
+      var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+
+      var offsetAnimation = animation.drive(tween);
+
+      return SlideTransition(position: offsetAnimation, child: child);
+    },
+  );
 }

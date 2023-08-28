@@ -15,7 +15,6 @@ class Notes with ChangeNotifier{
     });
     return [..._items];
   }
-
   List<int> selectedItems = [];
   bool selecting = false;
 
@@ -43,6 +42,7 @@ class Notes with ChangeNotifier{
   void addNote({
     required String title,
     required String description,
+    colorIndex = 0,
   }){
     final id = DateTime.now().toString();
     Note noteNew= Note(
@@ -50,6 +50,7 @@ class Notes with ChangeNotifier{
       title: title,
       description: description,
       date: DateTime.now(),
+      colorIndex: colorIndex,
     );
     // _myBox.add(noteNew);
     _items.add(noteNew);
@@ -61,10 +62,12 @@ class Notes with ChangeNotifier{
     required String title,
     required String description,
     required int index,
+    colorIndex = 0,
   }){
     _items[index].title = title;
     _items[index].description = description;
     _items[index].date = DateTime.now();
+    _items[index].colorIndex = colorIndex;
     NotesBox.editNotes(_items[index].toMap(), index);
     notifyListeners();
   }
@@ -103,6 +106,23 @@ class Notes with ChangeNotifier{
 
   bool isSelected(int index){
     return selectedItems.contains(index);
+  }
+
+  void deleteSelected(){
+    selectedItems.sort();
+    for(int i=selectedItems.length-1; i>=0; i--){
+      _items.removeAt(selectedItems[i]);
+      NotesBox.removeNotes(selectedItems[i]);
+    }
+    selectedItems.clear();
+    selecting = false;
+    notifyListeners();
+  }
+
+  void changeNoteColor(int index, int colorIndex){
+    _items[index].colorIndex = colorIndex;
+    NotesBox.editNotes(_items[index].toMap(), index);
+    notifyListeners();
   }
 
 }

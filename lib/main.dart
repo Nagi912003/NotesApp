@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
+
 import 'package:untitled1/providers/notes.dart';
 
-import 'models/note.dart';
 import 'screens/home_screen.dart';
 
 void main() async{
@@ -61,3 +62,4 @@ class MyApp extends StatelessWidget {
     );
   }
 }
+

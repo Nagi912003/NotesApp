@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:untitled1/models/note.dart';
-import 'package:untitled1/screens/add_note_screen.dart';
-import 'package:untitled1/widgets/note_tile.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import 'package:untitled1/models/note.dart';
 import '../providers/notes.dart';
+import 'package:untitled1/screens/add_note_screen.dart';
+import 'package:untitled1/widgets/note_tile.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -15,46 +15,25 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  // @override
-  // void initState() {
-  //   super.initState();
-  // }
-
   @override
   Widget build(BuildContext context) {
-    final notesData = Provider.of<Notes>(context, listen: false);
+    final notesData = Provider.of<Notes>(context);
     final notes = Provider.of<Notes>(context, listen: false).items;
 
-    // void _onNavItemTapped(int index) {
-    //   setState(() {
-    //
-    //   });
-    // }
-
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'notes',
-          style: TextStyle(fontSize: 40.sp, fontFamily: 'AlexBrush-Regular'),
-        ),
-        actions: [
-          IconButton(
-              onPressed: () {
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => AddNoteScreen()));
-              },
-              icon: Icon(Icons.add)),
-          SizedBox(width: 10.w),
-        ],
-      ),
+      appBar: MyAppBar(notesData.selecting),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
         child: buildPage(notesData, notes),
+        // Container(
+        //   width: 1.sw,
+        //   height: 1.sh,
+        //   color: Color(0xff1f191f),
+        // ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.push(context,
-              MaterialPageRoute(builder: (context) => AddNoteScreen()));
+          Navigator.of(context).push(_createRoute(null, null, null));
         },
         child: const Icon(Icons.add),
       ),
@@ -91,23 +70,57 @@ class _HomeScreenState extends State<HomeScreen> {
           .toList(),
     );
   }
+
+  AppBar MyAppBar(bool selecting) {
+    return AppBar(
+      title: Text(
+        'notes',
+        style: TextStyle(fontSize: 40.sp, fontFamily: 'AlexBrush-Regular'),
+      ),
+      actions: [
+
+        selecting
+            ? IconButton(
+                onPressed: () {
+                  Provider.of<Notes>(context, listen: false).selecting = false;
+                  Provider.of<Notes>(context, listen: false).selectedItems.clear();
+                },
+                icon: Icon(Icons.close))
+            : IconButton(
+                onPressed: () {
+                  Provider.of<Notes>(context, listen: false).selecting = true;
+                },
+                icon: Icon(Icons.select_all)),
+        selecting
+            ? IconButton(
+            onPressed: () {
+              Provider.of<Notes>(context, listen: false).deleteSelected();
+            },
+            icon: Icon(Icons.delete_outline))
+            : IconButton(
+            onPressed: () {
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => AddNoteScreen()));
+            },
+            icon: Icon(Icons.add)),
+      ],
+    );
+  }
 }
 
-//   Wrap(
-//   children: notes.map((e) => noteTile(
-//     context,
-//     index: notes.indexOf(e),
-//     id: e.id,
-//     title: e.title,
-//     date: e.date,
-//     description: e.description,
-//     isFavorite: e.isFavorite,
-//     isImportant: e.isImportant,
-//     onFavoriteTap: () {
-//       notesData.toggleIsFavorite(notes.indexOf(e));
-//     },
-//     onDeleteTap: () {
-//       notesData.deleteNoteById(notes.indexOf(e));
-//     },
-//   )).toList(),
-// )
+Route _createRoute(int? index, String? title, String? description) {
+  return PageRouteBuilder(
+    pageBuilder: (context, animation, secondaryAnimation) => index!=null?AddNoteScreen(index: index,title: title,description: description):AddNoteScreen(),
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      const begin = Offset(1.0, 0.0);
+      const end = Offset.zero;
+      const curve = Curves.easeInOut;
+
+      var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+
+      var offsetAnimation = animation.drive(tween);
+
+      return SlideTransition(position: offsetAnimation, child: child);
+    },
+  );
+}
