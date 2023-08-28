@@ -10,7 +10,6 @@ import 'package:untitled1/providers/notes.dart';
 import 'screens/home_screen.dart';
 
 void main() async{
-
   WidgetsFlutterBinding.ensureInitialized();
   await Hive.initFlutter();
   // var box =
