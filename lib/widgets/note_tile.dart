@@ -19,7 +19,7 @@ class CustomCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(10),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(4.0),
+        padding: const EdgeInsets.all(8.0),
         child: SizedBox(
           width: 1.sw,
           child: IntrinsicHeight(
@@ -92,7 +92,7 @@ class _NoteTileState extends State<NoteTile> {
             notesData.addSelected(widget.index );
           },
           child: Container(
-            margin: EdgeInsets.all(4),
+            margin: EdgeInsets.all(2),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(10),
               color: notesData.isSelected(widget.index)
