@@ -24,7 +24,15 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: MyAppBar(notesData.selecting),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
-        child: buildPage(notesData, notes),
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              buildPage(notesData, notesData.getImportantNotes(), isImportant: true),
+              if(notesData.hasImportantNotes)Divider(),
+              buildPage(notesData, notes),
+            ],
+          ),
+        ),
         // Container(
         //   width: 1.sw,
         //   height: 1.sh,
@@ -40,21 +48,19 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget buildPage(Notes notesData, List<Note> notes) {
-    return SingleChildScrollView(
-      child: Row(
-        mainAxisSize: MainAxisSize.max,
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: NotesColumn(notesData, notes, notesData.evenNotes()),
-          ),
-          Expanded(
-            child: NotesColumn(notesData, notes, notesData.oddNotes()),
-          ),
-        ],
-      ),
+  Widget buildPage(Notes notesData, List<Note> notes, {bool isImportant = false}) {
+    return Row(
+      mainAxisSize: MainAxisSize.max,
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          child: NotesColumn(notesData, notes, notesData.evenNotes(isImportant: isImportant)),
+        ),
+        Expanded(
+          child: NotesColumn(notesData, notes, notesData.oddNotes(isImportant: isImportant)),
+        ),
+      ],
     );
   }
 
@@ -64,7 +70,7 @@ class _HomeScreenState extends State<HomeScreen> {
       children: notesList
           .map(
             (e) => NoteTile(
-              index: notes.indexOf(e),
+              index: int.parse(e.id),
             ),
           )
           .toList(),
@@ -78,12 +84,13 @@ class _HomeScreenState extends State<HomeScreen> {
         style: TextStyle(fontSize: 40.sp, fontFamily: 'AlexBrush-Regular'),
       ),
       actions: [
-
         selecting
             ? IconButton(
                 onPressed: () {
                   Provider.of<Notes>(context, listen: false).selecting = false;
-                  Provider.of<Notes>(context, listen: false).selectedItems.clear();
+                  Provider.of<Notes>(context, listen: false)
+                      .selectedItems
+                      .clear();
                 },
                 icon: Icon(Icons.close))
             : IconButton(
@@ -93,16 +100,16 @@ class _HomeScreenState extends State<HomeScreen> {
                 icon: Icon(Icons.select_all)),
         selecting
             ? IconButton(
-            onPressed: () {
-              Provider.of<Notes>(context, listen: false).deleteSelected();
-            },
-            icon: Icon(Icons.delete_outline))
+                onPressed: () {
+                  Provider.of<Notes>(context, listen: false).deleteSelected();
+                },
+                icon: Icon(Icons.delete_outline))
             : IconButton(
-            onPressed: () {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => AddNoteScreen()));
-            },
-            icon: Icon(Icons.add)),
+                onPressed: () {
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => AddNoteScreen()));
+                },
+                icon: Icon(Icons.add)),
       ],
     );
   }
@@ -110,7 +117,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
 Route _createRoute(int? index, String? title, String? description) {
   return PageRouteBuilder(
-    pageBuilder: (context, animation, secondaryAnimation) => index!=null?AddNoteScreen(index: index,title: title,description: description):AddNoteScreen(),
+    pageBuilder: (context, animation, secondaryAnimation) => index != null
+        ? AddNoteScreen(index: index, title: title, description: description)
+        : AddNoteScreen(),
     transitionsBuilder: (context, animation, secondaryAnimation, child) {
       const begin = Offset(1.0, 0.0);
       const end = Offset.zero;

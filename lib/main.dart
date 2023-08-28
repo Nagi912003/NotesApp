@@ -13,7 +13,9 @@ void main() async{
 
   WidgetsFlutterBinding.ensureInitialized();
   await Hive.initFlutter();
-  var box = await Hive.openBox('navigation');
+  // var box =
+  await Hive.openBox('navigation');
+  // box.clear();
   runApp(const MyApp());
 }
 

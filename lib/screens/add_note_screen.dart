@@ -17,6 +17,7 @@ class AddNoteScreen extends StatefulWidget {
 class _AddNoteScreenState extends State<AddNoteScreen> {
   TextEditingController? _titleController;
   TextEditingController? _descriptionController;
+  bool isImportant = false;
 
   @override
   void initState() {
@@ -26,7 +27,17 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
     _descriptionController = widget.description == null
         ? TextEditingController()
         : TextEditingController(text: widget.description);
+
+    if(widget.index != null){
+      isImportant = Provider.of<Notes>(context, listen: false).items[widget.index!].isImportant;
+    }
     super.initState();
+  }
+
+  void toggleImportant() {
+    setState(() {
+      isImportant = !isImportant;
+    });
   }
 
   @override
@@ -55,10 +66,8 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
               icon: Icon(Icons.color_lens_outlined),
             ),
             IconButton(
-              onPressed: () {
-                // make the note important
-              },
-              icon: Icon(Icons.star_border_rounded),
+              onPressed: toggleImportant,
+              icon: isImportant?Icon(Icons.star_rounded):Icon(Icons.star_border_rounded),
             ),
             SizedBox(width: 10.w)
           ],
@@ -116,11 +125,13 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
         ? Provider.of<Notes>(context, listen: false).addNote(
             title: _titleController!.text.trim(),
             description: _descriptionController!.text.trim(),
+            isImportant: isImportant,
           )
         : Provider.of<Notes>(context, listen: false).editNote(
             index: widget.index!,
             title: _titleController!.text.trim(),
             description: _descriptionController!.text.trim(),
+            isImportant: isImportant,
           );
     return true;
   }
