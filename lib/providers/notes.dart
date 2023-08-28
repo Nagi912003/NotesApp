@@ -1,10 +1,8 @@
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:untitled1/helpers/notes_box.dart';
 import 'package:untitled1/models/note.dart';
 
 class Notes with ChangeNotifier {
-  // final Box _myBox = Hive.box('Notes');
   int id = 0;
   List<Note> _items = [];
 
@@ -103,6 +101,7 @@ class Notes with ChangeNotifier {
 
     NotesBox.getNotes().then((value) {
       _items = value.map((e) => Note.fromMap(e)).toList();
+      id = _items.length;
       notifyListeners();
     });
     WidgetsBinding.instance.addPostFrameCallback((_) {
