@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -16,16 +15,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  late Future googleFontsPending;
-  @override
-  void initState() {
-    super.initState();
-
-    googleFontsPending = GoogleFonts.pendingFonts([
-      GoogleFonts.montserrat(),
-    ]);
-  }
-
   @override
   Widget build(BuildContext context) {
     final notesData = Provider.of<Notes>(context);
@@ -33,31 +22,23 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return Scaffold(
       appBar: MyAppBar(notesData.selecting),
-      body: FutureBuilder(
-          future: googleFontsPending,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState != ConnectionState.done) {
-              return Center(child: const CircularProgressIndicator());
-            }
-          return Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  buildPage(notesData, notesData.getImportantNotes(),
-                      isImportant: true),
-                  if (notesData.hasImportantNotes) Divider(),
-                  buildPage(notesData, notes),
-                ],
-              ),
-            ),
-            // Container(
-            //   width: 1.sw,
-            //   height: 1.sh,
-            //   color: Color(0xff1f191f),
-            // ),
-          );
-        }
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              buildPage(notesData, notesData.getImportantNotes(),
+                  isImportant: true),
+              if (notesData.hasImportantNotes) Divider(),
+              buildPage(notesData, notes),
+            ],
+          ),
+        ),
+        // Container(
+        //   width: 1.sw,
+        //   height: 1.sh,
+        //   color: Color(0xff1f191f),
+        // ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
