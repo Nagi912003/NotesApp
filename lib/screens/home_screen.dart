@@ -27,8 +27,9 @@ class _HomeScreenState extends State<HomeScreen> {
         child: SingleChildScrollView(
           child: Column(
             children: [
-              buildPage(notesData, notesData.getImportantNotes(), isImportant: true),
-              if(notesData.hasImportantNotes)Divider(),
+              buildPage(notesData, notesData.getImportantNotes(),
+                  isImportant: true),
+              if (notesData.hasImportantNotes) Divider(),
               buildPage(notesData, notes),
             ],
           ),
@@ -48,17 +49,20 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget buildPage(Notes notesData, List<Note> notes, {bool isImportant = false}) {
+  Widget buildPage(Notes notesData, List<Note> notes,
+      {bool isImportant = false}) {
     return Row(
       mainAxisSize: MainAxisSize.max,
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Expanded(
-          child: NotesColumn(notesData, notes, notesData.evenNotes(isImportant: isImportant)),
+          child: NotesColumn(
+              notesData, notes, notesData.evenNotes(isImportant: isImportant)),
         ),
         Expanded(
-          child: NotesColumn(notesData, notes, notesData.oddNotes(isImportant: isImportant)),
+          child: NotesColumn(
+              notesData, notes, notesData.oddNotes(isImportant: isImportant)),
         ),
       ],
     );
@@ -83,34 +87,50 @@ class _HomeScreenState extends State<HomeScreen> {
         'notes',
         style: TextStyle(fontSize: 40.sp, fontFamily: 'AlexBrush-Regular'),
       ),
-      actions: [
-        selecting
-            ? IconButton(
-                onPressed: () {
-                  Provider.of<Notes>(context, listen: false).selecting = false;
-                  Provider.of<Notes>(context, listen: false)
-                      .selectedItems
-                      .clear();
-                },
-                icon: Icon(Icons.close))
-            : IconButton(
-                onPressed: () {
-                  Provider.of<Notes>(context, listen: false).selecting = true;
-                },
-                icon: Icon(Icons.select_all)),
-        selecting
-            ? IconButton(
-                onPressed: () {
-                  Provider.of<Notes>(context, listen: false).deleteSelected();
-                },
-                icon: Icon(Icons.delete_outline))
-            : IconButton(
-                onPressed: () {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => AddNoteScreen()));
-                },
-                icon: Icon(Icons.add)),
-      ],
+      actions: selecting
+          ? [
+              IconButton(
+                  onPressed: () {
+                    Provider.of<Notes>(context, listen: false).selecting =
+                        false;
+                    Provider.of<Notes>(context, listen: false)
+                        .selectedItems
+                        .clear();
+                  },
+                  icon: Icon(Icons.close)),
+              IconButton(
+                  onPressed: () {
+                    Provider.of<Notes>(context, listen: false)
+                        .addSelectedToImportant();
+                  },
+                  icon: Icon(Icons.star_outlined)),
+              IconButton(
+                  onPressed: () {
+                    Provider.of<Notes>(context, listen: false)
+                        .removeSelectedFromImportant();
+                  },
+                  icon: Icon(Icons.star_border_outlined)),
+              IconButton(
+                  onPressed: () {
+                    Provider.of<Notes>(context, listen: false).deleteSelected();
+                  },
+                  icon: Icon(Icons.delete_outline)),
+            ]
+          : [
+              IconButton(
+                  onPressed: () {
+                    Provider.of<Notes>(context, listen: false).selecting = true;
+                  },
+                  icon: Icon(Icons.select_all)),
+              IconButton(
+                  onPressed: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => AddNoteScreen()));
+                  },
+                  icon: Icon(Icons.add)),
+            ],
     );
   }
 }

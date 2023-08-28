@@ -145,6 +145,28 @@ class Notes with ChangeNotifier {
     notifyListeners();
   }
 
+  void addSelectedToImportant() {
+    selectedItems.sort();
+    for (int i = selectedItems.length - 1; i >= 0; i--) {
+      _items[selectedItems[i]].isImportant = true;
+      NotesBox.editNotes(_items[selectedItems[i]].toMap(), selectedItems[i]);
+    }
+    selectedItems.clear();
+    selecting = false;
+    notifyListeners();
+  }
+
+  void removeSelectedFromImportant() {
+    selectedItems.sort();
+    for (int i = selectedItems.length - 1; i >= 0; i--) {
+      _items[selectedItems[i]].isImportant = false;
+      NotesBox.editNotes(_items[selectedItems[i]].toMap(), selectedItems[i]);
+    }
+    selectedItems.clear();
+    selecting = false;
+    notifyListeners();
+  }
+
   void changeNoteColor(int index, int colorIndex) {
     _items[index].colorIndex = colorIndex;
     NotesBox.editNotes(_items[index].toMap(), index);
