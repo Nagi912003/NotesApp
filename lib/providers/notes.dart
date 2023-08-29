@@ -65,6 +65,7 @@ class Notes with ChangeNotifier {
     colorIndex = 0,
   }) {
     // final id = DateTime.now().toString();
+    id = _items.length;
     Note noteNew = Note(
       id: id.toString(),
       title: title,
@@ -120,7 +121,6 @@ class Notes with ChangeNotifier {
       return;
     }
     selectedItems.add(index);
-    print(selectedItems.length);
     notifyListeners();
   }
 
@@ -134,13 +134,28 @@ class Notes with ChangeNotifier {
   }
 
   void deleteSelected() {
-    selectedItems.sort();
-    for (int i = selectedItems.length - 1; i >= 0; i--) {
-      _items.removeAt(selectedItems[i]);
-      NotesBox.removeNotes(selectedItems[i]);
+    // selectedItems.sort();
+    selectedItems.forEach((element) {
+      _items.removeAt(element);
+      NotesBox.removeNotes(element);
+    });
+
+    for(int i =0; i< _items.length; i++){
+      _items[i].id = i.toString();
+      NotesBox.editNotes(_items[i].toMap(), i);
     }
+    id = _items.length;
+    print(id);
     selectedItems.clear();
     selecting = false;
+    notifyListeners();
+  }
+
+  void shiftItemsAfterDelete(int index) {
+    for (int i = index; i < _items.length; i++) {
+      _items[i].id = (int.parse(_items[i].id) - 1).toString();
+      NotesBox.editNotes(_items[i].toMap(), i);
+    }
     notifyListeners();
   }
 
