@@ -91,15 +91,6 @@ class _HomeScreenState extends State<HomeScreen> {
           ? [
               IconButton(
                   onPressed: () {
-                    Provider.of<Notes>(context, listen: false).selecting =
-                        false;
-                    Provider.of<Notes>(context, listen: false)
-                        .selectedItems
-                        .clear();
-                  },
-                  icon: Icon(Icons.close)),
-              IconButton(
-                  onPressed: () {
                     Provider.of<Notes>(context, listen: false)
                         .addSelectedToImportant();
                   },
@@ -110,6 +101,15 @@ class _HomeScreenState extends State<HomeScreen> {
                         .removeSelectedFromImportant();
                   },
                   icon: Icon(Icons.star_border_outlined)),
+              IconButton(
+                  onPressed: () {
+                    Provider.of<Notes>(context, listen: false).selecting =
+                        false;
+                    Provider.of<Notes>(context, listen: false)
+                        .selectedItems
+                        .clear();
+                  },
+                  icon: Icon(Icons.close)),
               IconButton(
                   onPressed: () {
                     Provider.of<Notes>(context, listen: false).deleteSelected();
